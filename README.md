@@ -1,24 +1,40 @@
 # 🖼️ Image Forge
 
-![Versão](https://img.shields.io/badge/vers%C3%A3o-v1.0.0-success?style=flat-square)
-![Python](https://img.shields.io/badge/Python-3.9%2B-blue?style=flat-square&logo=python)
-![Licença](https://img.shields.io/badge/Licença-MIT-informational?style=flat-square)
-
-**Image Forge** é uma ferramenta completa para conversão, organização e aprimoramento de imagens, criada para automatizar fluxos repetitivos com eficiência e precisão. Ideal para quem lida com grandes volumes de imagens e precisa padronizá-las com rapidez.
+**Image Forge** é uma ferramenta de organização e aprimoramento de grandes diretórios de imagem. Criado para profissionais, pesquisadores e colecionadores que lidam com grandes volumes de imagens, o Image Forge automatiza tarefas repetitivas com rapidez, clareza e eficiência.
 
 ---
 
-## ✨ Funcionalidades
+## 🚀 Principais Funcionalidades
 
-- 🔄 **Conversão automática** de imagens `.webp`, `.png`, `.jpeg` e `.jpg_large` para `.jpg`
-- ♻️ **Remoção inteligente de duplicatas** com verificação por hash
-- 🧩 **Realinhamento sequencial** conforme os padrões DSIP (imagens) e DSGP (GIFs)
-- 🖥️ **Interface gráfica (GUI)** com suporte a Drag & Drop (opcional)
-- 📈 **Barra de progresso e log detalhado**
-- 🧪 **EK1**: Aprimora qualidade de imagens e GIFs
+- 🔄 **Conversão automática de imagens** (.webp, .png, .jpeg, .jpg_large, etc.) para um formato padronizado (.jpg, .png ou .webp)
+- ♻️ **Remoção inteligente de duplicatas** com verificação por hash MD5
+- 🧩 **Realinhamento sequencial de arquivos**, padronizando nomes conforme convenções (`i1.jpg`, `g1.gif`, etc.)
+- 🧪 **EK1**: Aprimoramento automático de qualidade para imagens e GIFs
 - 📦 **EK2**: Refundição inteligente de arquivos `.zip` e subpastas
+- 🖥️ **Interface gráfica simples e intuitiva**, com suporte a **drag & drop**
+- 📊 **Exibição de métricas** após cada execução
+- 📜 **Log detalhado** e opção para salvar resultados
 
 ---
+
+## 🎯 Exemplo de Uso
+
+1. Abra o Image Forge
+2. Selecione uma pasta contendo imagens
+3. Escolha o formato de saída desejado (.jpg, .png, .webp)
+4. Clique em **Iniciar Pipeline**
+5. Acompanhe o progresso e visualize o log com os resultados
+
+---
+
+## 🧪 Requisitos
+
+- Python 3.9 ou superior
+- Bibliotecas necessárias:
+
+```bash
+pip install -r requirements.txt
+
 
 ## 📸 Exemplo de uso
 
