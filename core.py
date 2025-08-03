@@ -41,7 +41,16 @@ def converter_imagens(pasta, log_func=lambda msg: None, progress_callback=lambda
             img = Image.open(caminho)
             img.verify()
             img = Image.open(caminho).convert("RGB")
-            img.save(novo_caminho, formato_saida.replace(".", "").upper())
+
+            # Mapeamento correto para os formatos do Pillow
+            formato_pillow = {
+                ".jpg": "JPEG",
+                ".jpeg": "JPEG",
+                ".png": "PNG",
+                ".webp": "WEBP"
+            }.get(formato_saida.lower(), "JPEG")  # Default: JPEG
+
+            img.save(novo_caminho, formato_pillow)
             os.remove(caminho)
             log_func(f"{os.path.relpath(caminho)} convertido para {novo_nome}\n")
         except Exception as e:
