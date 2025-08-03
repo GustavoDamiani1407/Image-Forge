@@ -17,7 +17,14 @@
 
 ---
 
-## 🎯 Exemplo de Uso
+---
+
+## 🗂️ Histórico de Versões
+
+- **v1.1.1** — Correção de bug crítico no salvamento de imagens `.jpg`
+- **v1.1.0** — Adição de seletor de formato, métricas finais e drag & drop
+- **v1.0.0** — Versão inicial com pipeline funcional e GUI básica
+
 
 1. Abra o Image Forge
 2. Selecione uma pasta contendo imagens
