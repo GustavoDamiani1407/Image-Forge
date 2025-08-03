@@ -25,35 +25,6 @@
 - **v1.1.0** — Adição de seletor de formato, métricas finais e drag & drop
 - **v1.0.0** — Versão inicial com pipeline funcional e GUI básica
 
-
-1. Abra o Image Forge
-2. Selecione uma pasta contendo imagens
-3. Escolha o formato de saída desejado (.jpg, .png, .webp)
-4. Clique em **Iniciar Pipeline**
-5. Acompanhe o progresso e visualize o log com os resultados
-
----
-
-## 🧪 Requisitos
-
-- Python 3.9 ou superior
-- Bibliotecas necessárias:
-
-```bash
-pip install -r requirements.txt
-
-
-## 📸 Exemplo de uso
-
-Selecione uma pasta com imagens, clique em **Iniciar Pipeline** e o Image Forge executará as seguintes etapas:
-
-1. Converter imagens para `.jpg`
-2. Eliminar duplicatas
-3. Realinhar nomes sequenciais (i1.jpg, g1.gif, etc.)
-4. Exibir métricas do processamento
-
----
-
 ## 🧪 Requisitos
 
 - Python 3.9 ou superior  
