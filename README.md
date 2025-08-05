@@ -11,7 +11,7 @@
 - 🧩 **Realinhamento sequencial de arquivos**, padronizando nomes conforme convenções (`i1.jpg`, `g1.gif`, etc.)
 - 🧪 **EK1**: Aprimoramento automático de qualidade para imagens e GIFs
 - 📦 **EK2**: Refundição inteligente de arquivos `.zip` e subpastas
-- 🖥️ **Interface gráfica simples e intuitiva**, com suporte a **drag & drop**
+- 🖥️ **Interface gráfica simples e intuitiva**, com suporte a **drag & drop** (somente no campo de path)
 - 📊 **Exibição de métricas** após cada execução
 - 📜 **Log detalhado** e opção para salvar resultados
 
@@ -30,6 +30,13 @@
 
 - Python 3.9 ou superior  
 - Bibliotecas:
+- Tkinter
+- os
+- hashlib
+- PIL
+- re
+- zipfile
+- shutil
 
 ```bash
 pip install -r requirements.txt
