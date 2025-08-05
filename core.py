@@ -3,9 +3,6 @@ import re
 import hashlib
 from PIL import Image
 
-# ============================
-# Variável global de métricas
-# ============================
 METRICAS = {
     "convertidas": 0,
     "duplicatas": 0,
@@ -13,9 +10,6 @@ METRICAS = {
     "realinhadas": 0
 }
 
-# ============================
-# Conversor de imagens
-# ============================
 def converter_imagens(pasta, log_func=lambda msg: None, progress_callback=lambda val: None, formato_saida=".jpg"):
     log_func(f"Iniciando conversão para {formato_saida}\n")
     extensoes_convertiveis = [".jpg", ".jpeg", ".png", ".webp", ".jpg_large"]
@@ -42,13 +36,12 @@ def converter_imagens(pasta, log_func=lambda msg: None, progress_callback=lambda
             img.verify()
             img = Image.open(caminho).convert("RGB")
 
-            # Mapeamento correto para os formatos do Pillow
             formato_pillow = {
                 ".jpg": "JPEG",
                 ".jpeg": "JPEG",
                 ".png": "PNG",
                 ".webp": "WEBP"
-            }.get(formato_saida.lower(), "JPEG")  # Default: JPEG
+            }.get(formato_saida.lower(), "JPEG")
 
             img.save(novo_caminho, formato_pillow)
             os.remove(caminho)
@@ -62,9 +55,6 @@ def converter_imagens(pasta, log_func=lambda msg: None, progress_callback=lambda
     from core import METRICAS
     METRICAS["convertidas"] += total
 
-# ============================
-# Remoção de duplicatas
-# ============================
 def extrair_numero(nome):
     numeros = re.findall(r'\d+', nome)
     return int(numeros[0]) if numeros else float('inf')
@@ -91,9 +81,6 @@ def remover_duplicatas(pasta, log_func=lambda msg: None):
             else:
                 hash_dict[hashfile] = os.path.relpath(caminho)
 
-# ============================
-# Renomear arquivos TEMP
-# ============================
 def renomear_temp(pasta, log_func=lambda msg: None):
     METRICAS["temp_renomeados"] = 0
     log_func("Realinhando arquivos TEMP\n")
@@ -110,9 +97,6 @@ def renomear_temp(pasta, log_func=lambda msg: None):
                 except Exception as e:
                     log_func(f"Erro ao renomear {nome}: {e}\n")
 
-# ============================
-# Realinhador DSIP/DSGP
-# ============================
 def realinhar_sequencia(pasta, log_func=lambda msg: None, formato_saida=".jpg"):
     log_func("=== Realinhamento Inteligente Iniciado ===\n")
 
@@ -122,68 +106,97 @@ def realinhar_sequencia(pasta, log_func=lambda msg: None, formato_saida=".jpg"):
 
         if imagens:
             log_func(f"[DSIP] Subpasta: {os.path.relpath(raiz)} - {len(imagens)} arquivos\n")
-            processar_padrao(imagens, raiz, 'i', formato_saida, log_func)
+            processar_padrao_ciclico(imagens, raiz, 'i', formato_saida, log_func)
         if gifs:
             log_func(f"[DSGP] Subpasta: {os.path.relpath(raiz)} - {len(gifs)} arquivos\n")
-            processar_padrao(gifs, raiz, 'g', '.gif', log_func)
+            processar_padrao_ciclico(gifs, raiz, 'g', '.gif', log_func)
 
     log_func("=== Realinhamento Inteligente Concluído ===\n")
 
-def processar_padrao(lista, raiz, prefixo, extensao, log_func):
-    numerados = {}
-    aleatorios = []
+def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
+    extensao = extensao.lower()
 
-    for caminho in lista:
-        nome = os.path.basename(caminho)
-        match = re.fullmatch(fr"{prefixo}(\d+){re.escape(extensao)}", nome, re.IGNORECASE)
-        if match:
-            numerados[int(match.group(1))] = caminho
-        else:
-            aleatorios.append(caminho)
+    def separar_arquivos(arquivos):
+        numerados = {}
+        aleatorios = []
+        for caminho in arquivos:
+            nome = os.path.basename(caminho)
+            nome_lower = nome.lower()
+            match = re.fullmatch(fr"{prefixo}(\d+){re.escape(extensao)}", nome_lower)
+            if match:
+                numerados[int(match.group(1))] = caminho
+            else:
+                aleatorios.append(caminho)
+        return numerados, aleatorios
 
-    indices_existentes = sorted(numerados.keys())
-    maior_index = max(indices_existentes, default=0)
-    gaps = [i for i in range(1, maior_index + 1) if i not in numerados]
-
+    arquivos_atuais = list(lista)
     renomeios = []
 
-    for i in gaps:
-        destino = os.path.join(raiz, f"{prefixo}{i}{extensao}")
+    while True:
+        numerados, aleatorios = separar_arquivos(arquivos_atuais)
+        if not numerados:
+            # Sem arquivos numerados, nada a realinhar
+            break
+
+        indices = sorted(numerados.keys())
+        maior_index = indices[-1]
+
+        # Procurar o menor gap na sequência
+        gap = None
+        for i in range(1, maior_index):
+            if i not in numerados:
+                gap = i
+                break
+
+        if gap is None:
+            # Nenhum gap encontrado, realinhamento finalizado
+            break
+
+        destino = os.path.join(raiz, f"{prefixo}{gap}{extensao}")
+        origem = None
+
         if aleatorios:
+            # Preenche gap com arquivo aleatório
             origem = aleatorios.pop(0)
-            log_func(f"[REALINHAMENTO] Gap {i} preenchido com aleatório: {os.path.basename(origem)}\n")
+            log_func(f"[REALINHAMENTO] Gap {gap} preenchido com aleatório: {os.path.basename(origem)}\n")
         else:
-            maiores = sorted(numerados.items(), reverse=True)
-            origem = None
-            for idx, caminho in maiores:
-                if idx not in gaps:
-                    origem = numerados.pop(idx)
-                    log_func(f"[REALINHAMENTO] Gap {i} preenchido com contra marcha: {os.path.basename(origem)}\n")
-                    break
-            if not origem:
-                continue
+            # Contra-marcha: pegar arquivo com maior índice para fechar gap
+            maior_idx = max(numerados.keys())
+            if maior_idx != gap:
+                origem = numerados.pop(maior_idx)
+                log_func(f"[REALINHAMENTO] Gap {gap} preenchido com contra marcha: {os.path.basename(origem)}\n")
+            else:
+                # Não há aleatório nem contra-marcha possível
+                break
 
-        renomeios.append((origem, destino))
-        METRICAS["realinhadas"] += 1
+        if origem:
+            renomeios.append((origem, destino))
+            arquivos_atuais.remove(origem)
+            arquivos_atuais.append(destino)
+            METRICAS["realinhadas"] += 1
 
+    # Corrigir nomes fora do padrão (ex: i002 -> i2)
+    numerados, _ = separar_arquivos(arquivos_atuais)
     for idx, origem in numerados.items():
         destino = os.path.join(raiz, f"{prefixo}{idx}{extensao}")
         if os.path.basename(origem) != os.path.basename(destino):
             renomeios.append((origem, destino))
             log_func(f"[RENOMEIO] Corrigido: {os.path.basename(origem)} → {os.path.basename(destino)}\n")
 
-    proximo_idx = maior_index + 1
+    # Adicionar arquivos aleatórios restantes no final da sequência
+    _, aleatorios = separar_arquivos(arquivos_atuais)
+    proximo_idx = max(numerados.keys()) if numerados else 0
     for resto in aleatorios:
         while True:
+            proximo_idx += 1
             destino = os.path.join(raiz, f"{prefixo}{proximo_idx}{extensao}")
             if not os.path.exists(destino):
                 renomeios.append((resto, destino))
                 log_func(f"[EXTENSÃO] Aleatório adicionado ao final: {os.path.basename(resto)}\n")
                 METRICAS["realinhadas"] += 1
                 break
-            proximo_idx += 1
-        proximo_idx += 1
 
+    # Aplicar renomeios em duas fases para evitar conflito de nomes
     temp_map = {}
     for origem, destino in renomeios:
         if origem == destino:
@@ -198,15 +211,13 @@ def processar_padrao(lista, raiz, prefixo, extensao, log_func):
         os.rename(temp, destino)
         log_func(f"[PADRONIZAÇÃO] {os.path.basename(temp[:-5])} → {os.path.basename(destino)}\n")
 
-# ============================
-# Executor geral
-# ============================
+
 def executar_pipeline_completo(pasta, log_func=lambda msg: None, progress_callback=lambda v: None, formato_saida=".jpg"):
     for k in METRICAS:
         METRICAS[k] = 0
 
     log_func("=== Iniciando o Procedimento Image Forge ===\n")
-    converter_imagens(pasta,log_func=log_func,progress_callback=progress_callback,formato_saida=formato_saida)
+    converter_imagens(pasta, log_func=log_func, progress_callback=progress_callback, formato_saida=formato_saida)
     progress_callback(25)
     remover_duplicatas(pasta, log_func)
     progress_callback(50)
