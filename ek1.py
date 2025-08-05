@@ -1,7 +1,7 @@
 import os
 from PIL import Image, ImageEnhance, ImageSequence
 
-def aprimorar_jpeg(caminho, log_func, tr):
+def aprimorar_jpeg(caminho, log_func):
     try:
         with Image.open(caminho) as img:
             img = img.convert("RGB")
@@ -9,11 +9,11 @@ def aprimorar_jpeg(caminho, log_func, tr):
             img = ImageEnhance.Contrast(img).enhance(1.2)
             img = ImageEnhance.Brightness(img).enhance(1.05)
             img.save(caminho)
-            log_func(tr("[EK1] Aprimorado: {arquivo}\n").format(arquivo=os.path.relpath(caminho)))
+            log_func(f"[EK1] Aprimorado: {os.path.relpath(caminho)}\n")
     except Exception as e:
-        log_func(tr("[EK1] Erro ao aprimorar {arquivo}: {erro}\n").format(arquivo=os.path.basename(caminho), erro=e))
+        log_func(f"[EK1] Erro ao aprimorar {os.path.basename(caminho)}: {e}\n")
 
-def aprimorar_gif(caminho, log_func, tr):
+def aprimorar_gif(caminho, log_func):
     try:
         with Image.open(caminho) as img:
             frames = []
@@ -34,13 +34,13 @@ def aprimorar_gif(caminho, log_func, tr):
                 duration=img.info.get("duration", 100),
                 disposal=2
             )
-            log_func(tr("[EK1] GIF aprimorado: {arquivo}\n").format(arquivo=os.path.relpath(caminho)))
+            log_func(f"[EK1] GIF aprimorado: {os.path.relpath(caminho)}\n")
 
     except Exception as e:
-        log_func(tr("[EK1] Erro ao aprimorar GIF {arquivo}: {erro}\n").format(arquivo=os.path.basename(caminho), erro=e))
+        log_func(f"[EK1] Erro ao aprimorar GIF {os.path.basename(caminho)}: {e}\n")
 
-def executar_ek1(pasta, log_func=lambda msg: None, progress_callback=lambda v: None, tr=lambda x: x):
-    log_func(tr("=== Executando EK1 - Aprimoramento de Imagens ===\n"))
+def executar_ek1(pasta, log_func=lambda msg: None, progress_callback=lambda v: None):
+    log_func("=== Executando EK1 - Aprimoramento de Imagens ===\n")
 
     arquivos = []
     for raiz, _, nomes in os.walk(pasta):
@@ -50,18 +50,18 @@ def executar_ek1(pasta, log_func=lambda msg: None, progress_callback=lambda v: N
 
     total = len(arquivos)
     if total == 0:
-        log_func(tr("Nenhuma imagem .jpg, .jpeg ou .gif encontrada.\n"))
+        log_func("Nenhuma imagem .jpg, .jpeg ou .gif encontrada.\n")
         progress_callback(100)
         return
 
     for i, caminho in enumerate(arquivos, 1):
         if caminho.lower().endswith((".jpg", ".jpeg")):
-            aprimorar_jpeg(caminho, log_func, tr)
+            aprimorar_jpeg(caminho, log_func)
         elif caminho.lower().endswith(".gif"):
-            aprimorar_gif(caminho, log_func, tr)
+            aprimorar_gif(caminho, log_func)
 
         progresso = (i / total) * 100
         progress_callback(progresso)
 
-    log_func(tr("=== EK1 Concluído ===\n"))
+    log_func("=== EK1 Concluído ===\n")
     progress_callback(100)
