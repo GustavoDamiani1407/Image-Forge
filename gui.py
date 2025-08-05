@@ -7,6 +7,19 @@ from core import executar_pipeline_completo, METRICAS
 from ek1 import executar_ek1
 from ek2 import executar_ek2
 
+try:
+    from tkinterdnd2 import DND_FILES
+except ImportError:
+    DND_FILES = None
+
+try:
+    from tkinterdnd2 import DND_FILES
+    USE_DND = True
+except ImportError:
+    DND_FILES = None
+    USE_DND = False
+
+
 class ToolTip:
     def __init__(self, widget, texto):
         self.widget = widget
@@ -48,6 +61,13 @@ class ImageForgeGUI:
 
         self.entry_caminho = tk.Entry(frame_caminho, font=("Arial", 12))
         self.entry_caminho.pack(side=tk.LEFT, fill=tk.X, expand=True)
+
+        if USE_DND and DND_FILES is not None:
+            try:
+                self.entry_caminho.drop_target_register(DND_FILES)
+                self.entry_caminho.dnd_bind('<<Drop>>', self.handle_drop)
+            except Exception as e:
+                self.log(f"Drag & Drop não habilitado: {e}\n")
 
         btn_procurar = tk.Button(frame_caminho, text="Procurar Pasta", command=self.selecionar_pasta)
         btn_procurar.pack(side=tk.LEFT, padx=5)
@@ -95,6 +115,22 @@ class ImageForgeGUI:
         self.progresso_var = tk.DoubleVar()
         self.progressbar = ttk.Progressbar(root, variable=self.progresso_var, maximum=100)
         self.progressbar.pack(padx=10, pady=(0,10), fill=tk.X)
+
+    def handle_drop(self, event):
+        paths = self.root.tk.splitlist(event.data)
+        if paths:
+            pasta = paths[0]
+            if os.path.isdir(pasta):
+                self.pasta_selecionada = pasta
+                self.entry_caminho.delete(0, tk.END)
+                self.entry_caminho.insert(0, pasta)
+                self.log(f"Pasta arrastada e selecionada: {pasta}\n")
+                self.btn_iniciar.config(state=tk.NORMAL)
+                self.btn_ek1.config(state=tk.NORMAL)
+                self.btn_ek2.config(state=tk.NORMAL)
+                self.atualizar_progresso(0)
+            else:
+                self.log("Arraste uma pasta válida.\n")
 
     def log(self, msg):
         self.text_log.config(state=tk.NORMAL)
