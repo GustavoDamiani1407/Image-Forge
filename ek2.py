@@ -2,13 +2,13 @@ import os
 import zipfile
 import shutil
 
-def executar_ek2(pasta, log_func=lambda msg: None, progress_callback=lambda v: None):
+def executar_ek2(pasta, log_func=lambda msg: None, progress_callback=lambda v: None, tr=lambda x: x):
     """
     Refundição inteligente de arquivos .zip e suas subpastas.
     Extrai o conteúdo de todos os zips para uma pasta única, unificando os arquivos.
     """
 
-    log_func("=== Executando EK2 - Refundição de Zips ===\n")
+    log_func(tr("=== Executando EK2 - Refundição de Zips ===\n"))
 
     try:
         # Encontrar todos os arquivos zip na pasta e subpastas
@@ -20,7 +20,7 @@ def executar_ek2(pasta, log_func=lambda msg: None, progress_callback=lambda v: N
 
         total = len(arquivos_zip)
         if total == 0:
-            log_func("Nenhum arquivo .zip encontrado para refundir.\n")
+            log_func(tr("Nenhum arquivo .zip encontrado para refundir.\n"))
             progress_callback(100)
             return
 
@@ -31,7 +31,7 @@ def executar_ek2(pasta, log_func=lambda msg: None, progress_callback=lambda v: N
 
         for i, caminho_zip in enumerate(arquivos_zip, 1):
             nome_zip = os.path.basename(caminho_zip)
-            log_func(f"Processando {nome_zip}...\n")
+            log_func(tr("Processando {arquivo}...\n").format(arquivo=nome_zip))
 
             try:
                 with zipfile.ZipFile(caminho_zip, 'r') as zip_ref:
@@ -42,7 +42,7 @@ def executar_ek2(pasta, log_func=lambda msg: None, progress_callback=lambda v: N
                     os.makedirs(pasta_temp)
 
                     zip_ref.extractall(pasta_temp)
-                    log_func(f"Extraído {nome_zip} para pasta temporária {pasta_temp}\n")
+                    log_func(tr("Extraído {arquivo} para pasta temporária {pasta}\n").format(arquivo=nome_zip, pasta=pasta_temp))
 
                     # Agora mover arquivos da pasta_temp para a pasta_unificada
                     for root_temp, dirs_temp, files_temp in os.walk(pasta_temp):
@@ -66,23 +66,23 @@ def executar_ek2(pasta, log_func=lambda msg: None, progress_callback=lambda v: N
                                 destino = novo_destino
 
                             shutil.move(caminho_arquivo, destino)
-                    log_func(f"Conteúdo de {nome_zip} movido para {pasta_unificada}\n")
+                    log_func(tr("Conteúdo de {arquivo} movido para {pasta}\n").format(arquivo=nome_zip, pasta=pasta_unificada))
 
                     # Limpa pasta temporária
                     shutil.rmtree(pasta_temp)
 
                 # Remove o zip original
                 os.remove(caminho_zip)
-                log_func(f"Removido arquivo zip original {nome_zip}\n")
+                log_func(tr("Removido arquivo zip original {arquivo}\n").format(arquivo=nome_zip))
 
             except Exception as e:
-                log_func(f"Erro ao processar {nome_zip}: {e}\n")
+                log_func(tr("Erro ao processar {arquivo}: {erro}\n").format(arquivo=nome_zip, erro=e))
 
             progresso = (i / total) * 100
             progress_callback(progresso)
 
     except Exception as e:
-        log_func(f"Erro ao executar EK2: {e}\n")
+        log_func(tr("Erro ao executar EK2: {erro}\n").format(erro=e))
 
-    log_func("=== EK2 Concluído ===\n")
+    log_func(tr("=== EK2 Concluído ===\n"))
     progress_callback(100)
