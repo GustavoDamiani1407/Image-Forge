@@ -97,19 +97,23 @@ def renomear_temp(pasta, log_func=lambda msg: None):
                 except Exception as e:
                     log_func(f"Erro ao renomear {nome}: {e}\n")
 
-def realinhar_sequencia(pasta, log_func=lambda msg: None, formato_saida=".jpg"):
+def realinhar_sequencia(pasta, log_func=lambda msg: None, formato_saida=".jpg", prefixo_img='i', prefixo_gif='g'):
     log_func("=== Realinhamento Inteligente Iniciado ===\n")
 
     for raiz, _, arquivos in os.walk(pasta):
         imagens = [os.path.join(raiz, f) for f in arquivos if f.lower().endswith(formato_saida)]
         gifs = [os.path.join(raiz, f) for f in arquivos if f.lower().endswith(".gif")]
 
+        # ADICIONADO: Ordena as listas para preservar a ordem ao trocar de prefixo
+        imagens.sort(key=lambda path: extrair_numero(os.path.basename(path)))
+        gifs.sort(key=lambda path: extrair_numero(os.path.basename(path)))
+
         if imagens:
             log_func(f"[DSIP] Subpasta: {os.path.relpath(raiz)} - {len(imagens)} arquivos\n")
-            processar_padrao_ciclico(imagens, raiz, 'i', formato_saida, log_func)
+            processar_padrao_ciclico(imagens, raiz, prefixo_img, formato_saida, log_func)
         if gifs:
             log_func(f"[DSGP] Subpasta: {os.path.relpath(raiz)} - {len(gifs)} arquivos\n")
-            processar_padrao_ciclico(gifs, raiz, 'g', '.gif', log_func)
+            processar_padrao_ciclico(gifs, raiz, prefixo_gif, '.gif', log_func)
 
     log_func("=== Realinhamento Inteligente Concluído ===\n")
 
@@ -122,7 +126,7 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
         for caminho in arquivos:
             nome = os.path.basename(caminho)
             nome_lower = nome.lower()
-            match = re.fullmatch(fr"{prefixo}(\d+){re.escape(extensao)}", nome_lower)
+            match = re.fullmatch(fr"{re.escape(prefixo)}(\d+){re.escape(extensao)}", nome_lower)
             if match:
                 numerados[int(match.group(1))] = caminho
             else:
@@ -135,13 +139,11 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
     while True:
         numerados, aleatorios = separar_arquivos(arquivos_atuais)
         if not numerados:
-            # Sem arquivos numerados, nada a realinhar
             break
 
         indices = sorted(numerados.keys())
         maior_index = indices[-1]
 
-        # Procurar o menor gap na sequência
         gap = None
         for i in range(1, maior_index):
             if i not in numerados:
@@ -149,24 +151,20 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
                 break
 
         if gap is None:
-            # Nenhum gap encontrado, realinhamento finalizado
             break
 
         destino = os.path.join(raiz, f"{prefixo}{gap}{extensao}")
         origem = None
 
         if aleatorios:
-            # Preenche gap com arquivo aleatório
             origem = aleatorios.pop(0)
             log_func(f"[REALINHAMENTO] Gap {gap} preenchido com aleatório: {os.path.basename(origem)}\n")
         else:
-            # Contra-marcha: pegar arquivo com maior índice para fechar gap
             maior_idx = max(numerados.keys())
             if maior_idx != gap:
                 origem = numerados.pop(maior_idx)
                 log_func(f"[REALINHAMENTO] Gap {gap} preenchido com contra marcha: {os.path.basename(origem)}\n")
             else:
-                # Não há aleatório nem contra-marcha possível
                 break
 
         if origem:
@@ -175,7 +173,6 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
             arquivos_atuais.append(destino)
             METRICAS["realinhadas"] += 1
 
-    # Corrigir nomes fora do padrão (ex: i002 -> i2)
     numerados, _ = separar_arquivos(arquivos_atuais)
     for idx, origem in numerados.items():
         destino = os.path.join(raiz, f"{prefixo}{idx}{extensao}")
@@ -183,7 +180,6 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
             renomeios.append((origem, destino))
             log_func(f"[RENOMEIO] Corrigido: {os.path.basename(origem)} → {os.path.basename(destino)}\n")
 
-    # Adicionar arquivos aleatórios restantes no final da sequência
     _, aleatorios = separar_arquivos(arquivos_atuais)
     proximo_idx = max(numerados.keys()) if numerados else 0
     for resto in aleatorios:
@@ -196,7 +192,6 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
                 METRICAS["realinhadas"] += 1
                 break
 
-    # Aplicar renomeios em duas fases para evitar conflito de nomes
     temp_map = {}
     for origem, destino in renomeios:
         if origem == destino:
@@ -212,7 +207,7 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
         log_func(f"[PADRONIZAÇÃO] {os.path.basename(temp[:-5])} → {os.path.basename(destino)}\n")
 
 
-def executar_pipeline_completo(pasta, log_func=lambda msg: None, progress_callback=lambda v: None, formato_saida=".jpg"):
+def executar_pipeline_completo(pasta, log_func=lambda msg: None, progress_callback=lambda v: None, formato_saida=".jpg", prefixo_img='i', prefixo_gif='g'):
     for k in METRICAS:
         METRICAS[k] = 0
 
@@ -223,7 +218,7 @@ def executar_pipeline_completo(pasta, log_func=lambda msg: None, progress_callba
     progress_callback(50)
     renomear_temp(pasta, log_func)
     progress_callback(75)
-    realinhar_sequencia(pasta, log_func, formato_saida)
+    realinhar_sequencia(pasta, log_func, formato_saida, prefixo_img, prefixo_gif)
     progress_callback(100)
 
     log_func("\n=== Procedimento Concluído ===\n")
