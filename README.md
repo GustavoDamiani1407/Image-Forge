@@ -23,9 +23,9 @@
 
 - **v1.2.0** - Adição de customizador de prefixos
 - **v1.1.2** - Correção de bug no realinhador de sequencia e de bug que desabilitava função drag & drop 
-- **v1.1.1** — Correção de bug crítico no salvamento de imagens `.jpg`
-- **v1.1.0** — Adição de seletor de formato, métricas finais e drag & drop
-- **v1.0.0** — Versão inicial com pipeline funcional e GUI básica
+- **v1.1.1** - Correção de bug crítico no salvamento de imagens `.jpg`
+- **v1.1.0** - Adição de seletor de formato, métricas finais e drag & drop
+- **v1.0.0** - Versão inicial com pipeline funcional e GUI básica
 
 ## 🧪 Requisitos
 
