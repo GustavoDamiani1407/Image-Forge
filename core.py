@@ -225,3 +225,5 @@ def executar_pipeline_completo(pasta, log_func=lambda msg: None, progress_callba
     log_func("=== Métricas Gerais ===\n")
     for chave, valor in METRICAS.items():
         log_func(f"{chave.capitalize()}: {valor}\n")
+
+#V1.2.1

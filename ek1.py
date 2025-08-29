@@ -65,3 +65,5 @@ def executar_ek1(pasta, log_func=lambda msg: None, progress_callback=lambda v: N
 
     log_func("=== EK1 Concluído ===\n")
     progress_callback(100)
+
+#V1.2.1

@@ -255,3 +255,5 @@ class ImageForgeGUI:
 
 def iniciar_interface(root):
     ImageForgeGUI(root)
+
+#V1.2.1
