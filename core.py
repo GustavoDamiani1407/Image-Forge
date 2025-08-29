@@ -104,6 +104,10 @@ def realinhar_sequencia(pasta, log_func=lambda msg: None, formato_saida=".jpg", 
         imagens = [os.path.join(raiz, f) for f in arquivos if f.lower().endswith(formato_saida)]
         gifs = [os.path.join(raiz, f) for f in arquivos if f.lower().endswith(".gif")]
 
+        # ADICIONADO: Ordena as listas para preservar a ordem ao trocar de prefixo
+        imagens.sort(key=lambda path: extrair_numero(os.path.basename(path)))
+        gifs.sort(key=lambda path: extrair_numero(os.path.basename(path)))
+
         if imagens:
             log_func(f"[DSIP] Subpasta: {os.path.relpath(raiz)} - {len(imagens)} arquivos\n")
             processar_padrao_ciclico(imagens, raiz, prefixo_img, formato_saida, log_func)
@@ -122,7 +126,6 @@ def processar_padrao_ciclico(lista, raiz, prefixo, extensao, log_func):
         for caminho in arquivos:
             nome = os.path.basename(caminho)
             nome_lower = nome.lower()
-            # AQUI ESTÁ A CORREÇÃO FINAL: 'extenso' -> 'extensao'
             match = re.fullmatch(fr"{re.escape(prefixo)}(\d+){re.escape(extensao)}", nome_lower)
             if match:
                 numerados[int(match.group(1))] = caminho
