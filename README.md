@@ -21,6 +21,7 @@
 
 ## 🗂️ Histórico de Versões
 
+- **v1.2.1** - Correção do bug do embaralhamento
 - **v1.2.0** - Adição de customizador de prefixos
 - **v1.1.2** - Correção de bug no realinhador de sequencia e de bug que desabilitava função drag & drop 
 - **v1.1.1** - Correção de bug crítico no salvamento de imagens `.jpg`
