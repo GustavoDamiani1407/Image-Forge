@@ -81,10 +81,26 @@ class ImageForgeGUI:
 
         self.formato_var = tk.StringVar(value=".jpg")
         formato_menu = ttk.Combobox(frame_formato, textvariable=self.formato_var,
-                                    values=[".jpg", ".png", ".webp"],
-                                    state="readonly", width=10)
+                                      values=[".jpg", ".png", ".webp"],
+                                      state="readonly", width=10)
         formato_menu.pack(side=tk.LEFT, padx=5)
         ToolTip(formato_menu, "Selecione o formato final das imagens convertidas")
+        
+        # Frame para os prefixos
+        frame_prefixos = tk.Frame(root)
+        frame_prefixos.pack(padx=10, pady=5, fill=tk.X)
+
+        tk.Label(frame_prefixos, text="Prefixo Imagem:").pack(side=tk.LEFT, padx=(0, 5))
+        self.prefixo_img_var = tk.StringVar(value="i")
+        entry_prefixo_img = tk.Entry(frame_prefixos, textvariable=self.prefixo_img_var, width=10)
+        entry_prefixo_img.pack(side=tk.LEFT)
+        ToolTip(entry_prefixo_img, "Prefixo para renomear arquivos de imagem (ex: 'img-', 'foto_', etc.)")
+        
+        tk.Label(frame_prefixos, text="Prefixo GIF:").pack(side=tk.LEFT, padx=(10, 5))
+        self.prefixo_gif_var = tk.StringVar(value="g")
+        entry_prefixo_gif = tk.Entry(frame_prefixos, textvariable=self.prefixo_gif_var, width=10)
+        entry_prefixo_gif.pack(side=tk.LEFT)
+        ToolTip(entry_prefixo_gif, "Prefixo para renomear arquivos GIF (ex: 'gif-', 'anim_', etc.)")
 
         # Botões principais
         frame_botoes = tk.Frame(root)
@@ -164,11 +180,20 @@ class ImageForgeGUI:
         self.atualizar_progresso(0)
         try:
             formato = self.formato_var.get()
+            
+            prefixo_img = self.prefixo_img_var.get().strip() or "i"
+            prefixo_gif = self.prefixo_gif_var.get().strip() or "g"
+
+            # ADICIONE ESTA LINHA PARA DEBUG
+            self.log(f"DEBUG GUI: Lendo prefixos da interface. Imagem: '{prefixo_img}', GIF: '{prefixo_gif}'\n")
+
             executar_pipeline_completo(
                 self.pasta_selecionada,
                 log_func=self.log,
                 progress_callback=self.atualizar_progresso,
-                formato_saida=formato
+                formato_saida=formato,
+                prefixo_img=prefixo_img,
+                prefixo_gif=prefixo_gif
             )
         except Exception as e:
             self.log(f"Erro no pipeline: {e}\n")
