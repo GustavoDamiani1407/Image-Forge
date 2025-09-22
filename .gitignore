@@ -10,4 +10,10 @@ __pycache__/
 .vscode/
 .idea/
 
-#V1.2.1
+# PyInstaller files
+/build/
+/dist/
+*.spec
+
+/Output/
+#V1.2.2
